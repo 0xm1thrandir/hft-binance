@@ -15,6 +15,9 @@ func NewLimitOrder(price float64) LimitOrder {
 		orders: &q,
 	}
 }
+func (l *LimitOrder) UpdateVolume(newVolume float64) {
+	l.totalVolume = newVolume
+}
 
 func (this *LimitOrder) TotalVolume() float64 {
 	return this.totalVolume

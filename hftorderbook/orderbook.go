@@ -17,6 +17,45 @@ type Orderbook struct {
 	pool *sync.Pool
 }
 
+func NewOrder(id int, volume float64, price float64, bidOrAsk bool) *Order {
+	return &Order{
+		Id:      id,
+		Volume:  volume,
+		BidOrAsk: bidOrAsk,
+	}
+}
+
+// UpdateBestBid updates the best bid price and volume in the order book.
+func (ob *Orderbook) UpdateBestBid(price, volume float64) {
+	if volume == 0 {
+		ob.DeleteBidLimit(price)
+	} else {
+		limit := ob.bidLimitsCache[price]
+		if limit == nil {
+			order := NewOrder(0, volume, price, true) // Replace the '0' with a valid order ID if necessary
+			ob.Add(price, order)
+		} else {
+			limit.UpdateVolume(volume)
+		}
+	}
+}
+
+// UpdateBestAsk updates the best ask price and volume in the order book.
+func (ob *Orderbook) UpdateBestAsk(price, volume float64) {
+	if volume == 0 {
+		ob.DeleteAskLimit(price)
+	} else {
+		limit := ob.askLimitsCache[price]
+		if limit == nil {
+			order := NewOrder(0, volume, price, false) // Replace the '0' with a valid order ID if necessary
+			ob.Add(price, order)
+		} else {
+			limit.UpdateVolume(volume)
+		}
+	}
+}
+
+
 func NewOrderbook() Orderbook {
 	bids := NewRedBlackBST()
 	asks := NewRedBlackBST()
